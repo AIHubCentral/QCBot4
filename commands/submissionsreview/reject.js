@@ -75,7 +75,7 @@ module.exports = {
 
             if (logsChannelId) {
                 const logsChannel = await interaction.guild.channels.fetch(logsChannelId);
-                await logsChannel.send({ embeds: [ new EmbedBuilder()
+                await logsChannel.send({ content: `<@460577350900514837>`, embeds: [ new EmbedBuilder()
                     .setColor(`Red`)
                     .setTitle('New voice model rejected')
                     .setDescription(`**ID:** ${inputSubmissionId}\n**Submitted by:** <@${applicantId}>\n**Link:** ${submissionLink}\n\n**Rejected by:** <@${interaction.user.id}>\n**Reason:** *${reason}*`) ] });
