@@ -34,7 +34,7 @@ module.exports = {
 			.setStyle(ButtonStyle.Secondary);
 
 		const sentMessage = await interaction.editReply({
-			content: `Confirm server restart?`,
+			content: `Choose what to do with the bot's server:`,
 			components: [ new ActionRowBuilder().addComponents(cancelButton, stopButton, restartButton) ],
         });
 
