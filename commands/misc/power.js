@@ -18,25 +18,30 @@ module.exports = {
             return await interaction.editReply(`You do not have permission to use this command.`);
         }
 
-        const confirmButton = new ButtonBuilder()
-			.setCustomId('confirm')
-			.setLabel('Confirm')
+        const restartButton = new ButtonBuilder()
+			.setCustomId('restart')
+			.setLabel('Restart')
 			.setStyle(ButtonStyle.Success);
+
+		const stopButton = new ButtonBuilder()
+			.setCustomId('stop')
+			.setLabel('Stop')
+			.setStyle(ButtonStyle.Danger);
 
 		const cancelButton = new ButtonBuilder()
 			.setCustomId('cancel')
-			.setLabel('Cancel')
+			.setLabel('Cancel action')
 			.setStyle(ButtonStyle.Secondary);
 
 		const sentMessage = await interaction.editReply({
 			content: `Confirm server restart?`,
-			components: [ new ActionRowBuilder().addComponents(cancelButton, confirmButton) ],
+			components: [ new ActionRowBuilder().addComponents(cancelButton, stopButton, restartButton) ],
         });
 
         try {
             const confirmation = await sentMessage.awaitMessageComponent({ time: 30_000 });
 
-            if (confirmation.customId == 'confirm') {
+            if (confirmation.customId == 'restart') {
 				await interaction.editReply({ content: `Restart request will be sent <t:${Math.floor(new Date().getTime() / 1000) + 10}:R>`, components: [] });
 				await wait(10_000);
 
@@ -53,6 +58,24 @@ module.exports = {
 
 				if (response.status != 204) {
 					throw new Error(`Failed to restart server: ${response.status}`);
+				}
+            } else if (confirmation.customId == 'stop') {
+				await interaction.editReply({ content: `Stop request will be sent <t:${Math.floor(new Date().getTime() / 1000) + 10}:R>`, components: [] });
+				await wait(10_000);
+
+				const response = await axios.post(
+					`${powerUrl}/api/client/servers/${powerId}/power`,
+					{ signal: 'stop' },
+					{
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${powerApiKey}`,
+						},
+					}
+				);
+
+				if (response.status != 204) {
+					throw new Error(`Failed to stop server: ${response.status}`);
 				}
             } else if (confirmation.customId == 'cancel') {
                 await confirmation.update({ content: `Action cancelled.`, components: [] });
