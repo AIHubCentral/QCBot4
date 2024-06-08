@@ -18,6 +18,11 @@ module.exports = {
             return await interaction.editReply(`You do not have permission to use this command.`);
         }
 
+		const databaseButton = new ButtonBuilder()
+			.setCustomId('database')
+			.setLabel('Get database file')
+			.setStyle(ButtonStyle.Secondary);
+
         const restartButton = new ButtonBuilder()
 			.setCustomId('restart')
 			.setLabel('Restart')
@@ -35,13 +40,29 @@ module.exports = {
 
 		const sentMessage = await interaction.editReply({
 			content: `Choose what to do with the bot's server:`,
-			components: [ new ActionRowBuilder().addComponents(cancelButton, stopButton, restartButton) ],
+			components: [ new ActionRowBuilder().addComponents(cancelButton, stopButton, restartButton, databaseButton) ],
         });
 
         try {
             const confirmation = await sentMessage.awaitMessageComponent({ time: 30_000 });
 
-            if (confirmation.customId == 'restart') {
+			if (confirmation.customId == 'database') {
+				const response = await axios.get(
+					`${powerUrl}/api/client/servers/${powerId}/files/download?file=%2Fdatabase%2Fdatabase.sqlite`,
+					{
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${powerApiKey}`,
+						},
+					}
+				);
+
+				if (response.status == 200) {
+					await interaction.editReply({ content: `Database file one-time download link: ${JSON.stringify(response.data.attributes.url)}`, components: [] });
+				} else {
+					throw new Error(`Failed to restart server: ${response.status}`);
+				}
+			} else if (confirmation.customId == 'restart') {
 				await interaction.editReply({ content: `Restart request will be sent <t:${Math.floor(new Date().getTime() / 1000) + 10}:R>`, components: [] });
 				await wait(10_000);
 
