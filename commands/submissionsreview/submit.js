@@ -101,8 +101,8 @@ module.exports = {
         }
 
         // Checks if the image/demo are of an accepted type
-        const imageType = image.contentType.toLowerCase();
-        const demoType = demo.contentType.toLowerCase();
+        const imageType = image.contentType?.toLowerCase() || "";
+        const demoType = demo.contentType?.toLowerCase() || ""
 
         if (!imageType.includes('png') && !imageType.includes('jpeg') && !imageType.includes('gif') && !imageType.includes('webp')) {
             return await interaction.editReply(`Invalid file type for "image". Please attach a file with a supported extension.\nSupported file types: \`.png\`, \`.jpg\`, \`.jpeg\`, \`.gif\`, \`.webp\`.`);
